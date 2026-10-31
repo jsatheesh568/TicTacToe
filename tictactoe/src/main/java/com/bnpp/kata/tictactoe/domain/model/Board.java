@@ -41,6 +41,10 @@ public class Board {
         return true;
     }
 
+    public void removeMark(int row, int column) {
+        getCell(row, column).clear();
+    }
+
     public void reset() {
         for (int index = 0; index < TOTAL_CELLS; index++) {
             cells.set(index, new Cell());

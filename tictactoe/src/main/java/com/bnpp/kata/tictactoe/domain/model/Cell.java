@@ -1,3 +1,4 @@
+
 package com.bnpp.kata.tictactoe.domain.model;
 
 public class Cell {
@@ -13,7 +14,6 @@ public class Cell {
     }
 
     public void placeMark(Mark mark) {
-
         if (mark == null) {
             throw new IllegalArgumentException(
                     "Player mark cannot be null"
@@ -27,5 +27,9 @@ public class Cell {
         }
 
         this.mark = mark;
+    }
+
+    void clear() {
+        this.mark = null;
     }
 }

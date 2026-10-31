@@ -56,6 +56,23 @@ public class Game {
         switchTurn();
     }
 
+    public void undoLastMove() {
+        if (moveHistory.isEmpty()) {
+            throw new IllegalStateException(
+                    "No moves available to undo"
+            );
+        }
+
+        Move lastMove = moveHistory.get(moveHistory.size() - 1);
+
+        board.removeMark(lastMove.getRow(), lastMove.getColumn());
+
+        moveHistory.remove(moveHistory.size() - 1);
+
+        currentMark = lastMove.getMark();
+        status = GameStatus.IN_PROGRESS;
+    }
+
     public void restart() {
         board.reset();
         moveHistory.clear();
