@@ -1,9 +1,10 @@
+
 package com.bnpp.kata.tictactoe.domain.model;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GameTest {
 
@@ -11,7 +12,14 @@ class GameTest {
     void shouldStartGameWithPlayerX() {
         Game game = new Game();
 
-        assertThat(game.getCurrentMark()).isEqualTo(Mark.X);
+        assertEquals(Mark.X, game.getCurrentMark());
+    }
+
+    @Test
+    void shouldStartGameWithInProgressStatus() {
+        Game game = new Game();
+
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
     }
 
     @Test
@@ -20,8 +28,8 @@ class GameTest {
 
         game.play(0, 0);
 
-        assertThat(game.getMarkAt(0, 0)).isEqualTo(Mark.X);
-        assertThat(game.getCurrentMark()).isEqualTo(Mark.O);
+        assertEquals(Mark.X, game.getMarkAt(0, 0));
+        assertEquals(Mark.O, game.getCurrentMark());
     }
 
     @Test
@@ -31,9 +39,8 @@ class GameTest {
         game.play(0, 0);
         game.play(1, 1);
 
-        assertThat(game.getMarkAt(0, 0)).isEqualTo(Mark.X);
-        assertThat(game.getMarkAt(1, 1)).isEqualTo(Mark.O);
-        assertThat(game.getCurrentMark()).isEqualTo(Mark.X);
+        assertEquals(Mark.O, game.getMarkAt(1, 1));
+        assertEquals(Mark.X, game.getCurrentMark());
     }
 
     @Test
@@ -42,19 +49,23 @@ class GameTest {
 
         game.play(0, 0);
 
-        assertThatThrownBy(() -> game.play(0, 0))
-                .isInstanceOf(IllegalStateException.class);
+        assertThrows(
+                IllegalStateException.class,
+                () -> game.play(0, 0)
+        );
 
-        assertThat(game.getCurrentMark()).isEqualTo(Mark.O);
+        assertEquals(Mark.O, game.getCurrentMark());
     }
 
     @Test
     void shouldNotChangeTurnWhenPositionIsInvalid() {
         Game game = new Game();
 
-        assertThatThrownBy(() -> game.play(3, 0))
-                .isInstanceOf(IndexOutOfBoundsException.class);
+        assertThrows(
+                IndexOutOfBoundsException.class,
+                () -> game.play(3, 0)
+        );
 
-        assertThat(game.getCurrentMark()).isEqualTo(Mark.X);
+        assertEquals(Mark.X, game.getCurrentMark());
     }
 }
