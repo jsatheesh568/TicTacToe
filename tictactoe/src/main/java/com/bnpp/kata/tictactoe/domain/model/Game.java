@@ -26,6 +26,8 @@ public class Game {
     }
 
     public void play(int row, int column) {
+        validateGameIsInProgress();
+
         board.placeMark(row, column, currentMark);
 
         if (board.hasWinner(currentMark)) {
@@ -39,6 +41,14 @@ public class Game {
         }
 
         switchTurn();
+    }
+
+    private void validateGameIsInProgress() {
+        if (status != GameStatus.IN_PROGRESS) {
+            throw new IllegalStateException(
+                    "Game has already finished with status: " + status
+            );
+        }
     }
 
     private void switchTurn() {
