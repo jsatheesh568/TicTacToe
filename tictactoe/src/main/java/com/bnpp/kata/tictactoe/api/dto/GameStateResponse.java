@@ -1,10 +1,12 @@
-package com.bnpp.kata.tictactoe.dto;
+package com.bnpp.kata.tictactoe.api.dto;
 
 import com.bnpp.kata.tictactoe.domain.model.GameStatus;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
 import com.bnpp.kata.tictactoe.domain.model.PlayerType;
 
-public class GameStartResponse {
+import java.util.List;
+
+public class GameStateResponse {
 
     private final String gameId;
 
@@ -16,11 +18,15 @@ public class GameStartResponse {
     private final Mark playerOMark;
     private final PlayerType playerOType;
 
+    private final List<List<String>> board;
+
     private final String currentPlayerName;
     private final Mark currentMark;
     private final GameStatus status;
 
-    public GameStartResponse(
+    private final List<MoveHistoryResponse> moveHistory;
+
+    public GameStateResponse(
             String gameId,
             String playerXName,
             Mark playerXMark,
@@ -28,9 +34,11 @@ public class GameStartResponse {
             String playerOName,
             Mark playerOMark,
             PlayerType playerOType,
+            List<List<String>> board,
             String currentPlayerName,
             Mark currentMark,
-            GameStatus status
+            GameStatus status,
+            List<MoveHistoryResponse> moveHistory
     ) {
         this.gameId = gameId;
         this.playerXName = playerXName;
@@ -39,9 +47,11 @@ public class GameStartResponse {
         this.playerOName = playerOName;
         this.playerOMark = playerOMark;
         this.playerOType = playerOType;
+        this.board = board;
         this.currentPlayerName = currentPlayerName;
         this.currentMark = currentMark;
         this.status = status;
+        this.moveHistory = moveHistory;
     }
 
     public String getGameId() {
@@ -72,6 +82,10 @@ public class GameStartResponse {
         return playerOType;
     }
 
+    public List<List<String>> getBoard() {
+        return board;
+    }
+
     public String getCurrentPlayerName() {
         return currentPlayerName;
     }
@@ -82,5 +96,9 @@ public class GameStartResponse {
 
     public GameStatus getStatus() {
         return status;
+    }
+
+    public List<MoveHistoryResponse> getMoveHistory() {
+        return moveHistory;
     }
 }

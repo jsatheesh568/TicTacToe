@@ -2,15 +2,19 @@ package com.bnpp.kata.tictactoe.api.controller;
 
 import com.bnpp.kata.tictactoe.api.dto.GameMoveResponse;
 import com.bnpp.kata.tictactoe.api.dto.GameStartResponse;
+import com.bnpp.kata.tictactoe.api.dto.GameStateResponse;
 import com.bnpp.kata.tictactoe.api.dto.MakeMoveRequest;
+import com.bnpp.kata.tictactoe.api.dto.MoveHistoryResponse;
 import com.bnpp.kata.tictactoe.api.dto.StartGameRequest;
 import com.bnpp.kata.tictactoe.application.service.GameApplicationService;
 import com.bnpp.kata.tictactoe.application.service.GameSession;
 import com.bnpp.kata.tictactoe.domain.model.Game;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
+import com.bnpp.kata.tictactoe.domain.model.Move;
 import com.bnpp.kata.tictactoe.domain.model.Player;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -90,6 +94,33 @@ public class GameController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{gameId}")
+    public ResponseEntity<GameStateResponse> getGameState(
+            @PathVariable String gameId
+    ) {
+        Game game = gameApplicationService.getGame(gameId);
+
+        Player playerX = game.getPlayer(Mark.X);
+        Player playerO = game.getPlayer(Mark.O);
+
+        GameStateResponse response = new GameStateResponse(
+                gameId,
+                playerX.getName(),
+                playerX.getMark(),
+                playerX.getType(),
+                playerO.getName(),
+                playerO.getMark(),
+                playerO.getType(),
+                buildBoard(game),
+                game.getCurrentPlayer().getName(),
+                game.getCurrentMark(),
+                game.getStatus(),
+                buildMoveHistory(game)
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
     private List<List<String>> buildBoard(Game game) {
         List<List<String>> board = new ArrayList<>();
 
@@ -108,5 +139,21 @@ public class GameController {
         }
 
         return board;
+    }
+
+    private List<MoveHistoryResponse> buildMoveHistory(Game game) {
+        List<MoveHistoryResponse> history = new ArrayList<>();
+
+        for (Move move : game.getMoveHistory()) {
+            history.add(
+                    new MoveHistoryResponse(
+                            move.getMark(),
+                            move.getRow(),
+                            move.getColumn()
+                    )
+            );
+        }
+
+        return history;
     }
 }
