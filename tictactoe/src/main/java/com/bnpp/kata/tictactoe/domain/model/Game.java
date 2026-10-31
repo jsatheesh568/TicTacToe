@@ -1,4 +1,3 @@
-
 package com.bnpp.kata.tictactoe.domain.model;
 
 public class Game {
@@ -27,6 +26,12 @@ public class Game {
 
     public void play(int row, int column) {
         board.placeMark(row, column, currentMark);
+
+        if (board.hasWinner(currentMark)) {
+            status = GameStatus.WON;
+            return;
+        }
+
         switchTurn();
     }
 

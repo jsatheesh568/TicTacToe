@@ -1,4 +1,3 @@
-
 package com.bnpp.kata.tictactoe.domain.model;
 
 import org.junit.jupiter.api.Test;
@@ -30,6 +29,7 @@ class GameTest {
 
         assertEquals(Mark.X, game.getMarkAt(0, 0));
         assertEquals(Mark.O, game.getCurrentMark());
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
     }
 
     @Test
@@ -40,6 +40,62 @@ class GameTest {
         game.play(1, 1);
 
         assertEquals(Mark.O, game.getMarkAt(1, 1));
+        assertEquals(Mark.X, game.getCurrentMark());
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
+    }
+
+    @Test
+    void shouldSetGameStatusToWonWhenPlayerWinsHorizontally() {
+        Game game = new Game();
+
+        game.play(0, 0); // X
+        game.play(1, 0); // O
+        game.play(0, 1); // X
+        game.play(1, 1); // O
+        game.play(0, 2); // X wins
+
+        assertEquals(GameStatus.WON, game.getStatus());
+        assertEquals(Mark.X, game.getCurrentMark());
+    }
+
+    @Test
+    void shouldSetGameStatusToWonWhenPlayerWinsVertically() {
+        Game game = new Game();
+
+        game.play(0, 0); // X
+        game.play(0, 1); // O
+        game.play(1, 0); // X
+        game.play(1, 1); // O
+        game.play(2, 0); // X wins
+
+        assertEquals(GameStatus.WON, game.getStatus());
+        assertEquals(Mark.X, game.getCurrentMark());
+    }
+
+    @Test
+    void shouldSetGameStatusToWonWhenPlayerWinsDiagonally() {
+        Game game = new Game();
+
+        game.play(0, 0); // X
+        game.play(0, 1); // O
+        game.play(1, 1); // X
+        game.play(0, 2); // O
+        game.play(2, 2); // X wins
+
+        assertEquals(GameStatus.WON, game.getStatus());
+        assertEquals(Mark.X, game.getCurrentMark());
+    }
+
+    @Test
+    void shouldKeepGameInProgressWhenNoPlayerHasWon() {
+        Game game = new Game();
+
+        game.play(0, 0); // X
+        game.play(0, 1); // O
+        game.play(0, 2); // X
+        game.play(1, 1); // O
+
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
     }
 
@@ -55,6 +111,7 @@ class GameTest {
         );
 
         assertEquals(Mark.O, game.getCurrentMark());
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
     }
 
     @Test
@@ -67,5 +124,6 @@ class GameTest {
         );
 
         assertEquals(Mark.X, game.getCurrentMark());
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
     }
 }
