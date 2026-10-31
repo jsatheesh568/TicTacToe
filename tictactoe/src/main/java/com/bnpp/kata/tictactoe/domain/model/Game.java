@@ -1,14 +1,16 @@
-
 package com.bnpp.kata.tictactoe.domain.model;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 
 public class Game {
 
     private final Board board;
     private final List<Move> moveHistory;
+    private final Deque<Move> redoHistory;
 
     private Mark currentMark;
     private GameStatus status;
@@ -16,6 +18,7 @@ public class Game {
     public Game() {
         this.board = new Board();
         this.moveHistory = new ArrayList<>();
+        this.redoHistory = new ArrayDeque<>();
         this.currentMark = Mark.X;
         this.status = GameStatus.IN_PROGRESS;
     }
@@ -43,17 +46,10 @@ public class Game {
 
         moveHistory.add(new Move(currentMark, row, column));
 
-        if (board.hasWinner(currentMark)) {
-            status = GameStatus.WON;
-            return;
-        }
+        // A new move creates a different game history.
+        redoHistory.clear();
 
-        if (board.isFull()) {
-            status = GameStatus.DRAW;
-            return;
-        }
-
-        switchTurn();
+        updateGameStatus();
     }
 
     public void undoLastMove() {
@@ -69,15 +65,56 @@ public class Game {
 
         moveHistory.remove(moveHistory.size() - 1);
 
+        redoHistory.push(lastMove);
+
         currentMark = lastMove.getMark();
         status = GameStatus.IN_PROGRESS;
+    }
+
+    public void redoLastMove() {
+        if (redoHistory.isEmpty()) {
+            throw new IllegalStateException(
+                    "No moves available to redo"
+            );
+        }
+
+        Move move = redoHistory.pop();
+
+        board.placeMark(
+                move.getRow(),
+                move.getColumn(),
+                move.getMark()
+        );
+
+        moveHistory.add(move);
+
+        currentMark = move.getMark();
+
+        updateGameStatus();
     }
 
     public void restart() {
         board.reset();
         moveHistory.clear();
+        redoHistory.clear();
+
         currentMark = Mark.X;
         status = GameStatus.IN_PROGRESS;
+    }
+
+    private void updateGameStatus() {
+        if (board.hasWinner(currentMark)) {
+            status = GameStatus.WON;
+            return;
+        }
+
+        if (board.isFull()) {
+            status = GameStatus.DRAW;
+            return;
+        }
+
+        status = GameStatus.IN_PROGRESS;
+        switchTurn();
     }
 
     private void validateGameIsInProgress() {
