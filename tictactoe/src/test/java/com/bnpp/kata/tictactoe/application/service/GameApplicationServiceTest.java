@@ -1,5 +1,7 @@
 package com.bnpp.kata.tictactoe.application.service;
 
+import com.bnpp.kata.tictactoe.application.exception.GameNotFoundException;
+import com.bnpp.kata.tictactoe.application.exception.InvalidGameOperationException;
 import com.bnpp.kata.tictactoe.domain.model.Game;
 import com.bnpp.kata.tictactoe.domain.model.GameStatus;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
@@ -118,7 +120,7 @@ class GameMoveApplicationServiceTest {
     @Test
     void shouldRejectMoveWhenGameDoesNotExist() {
         assertThrows(
-                IllegalArgumentException.class,
+                GameNotFoundException.class,
                 () -> service.playMove("invalid-game-id", 0, 0)
         );
     }
@@ -133,7 +135,7 @@ class GameMoveApplicationServiceTest {
         );
 
         assertThrows(
-                IllegalStateException.class,
+                InvalidGameOperationException.class,
                 () -> service.playMove(session.getGameId(), 0, 0)
         );
     }
