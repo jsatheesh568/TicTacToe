@@ -41,6 +41,12 @@ public class Board {
         return true;
     }
 
+    public void reset() {
+        for (int index = 0; index < TOTAL_CELLS; index++) {
+            cells.set(index, new Cell());
+        }
+    }
+
     public boolean hasHorizontalWinner(Mark mark) {
         validateMark(mark);
 

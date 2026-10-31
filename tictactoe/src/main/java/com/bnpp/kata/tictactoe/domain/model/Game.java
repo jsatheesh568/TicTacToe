@@ -43,6 +43,12 @@ public class Game {
         switchTurn();
     }
 
+    public void restart() {
+        board.reset();
+        currentMark = Mark.X;
+        status = GameStatus.IN_PROGRESS;
+    }
+
     private void validateGameIsInProgress() {
         if (status != GameStatus.IN_PROGRESS) {
             throw new IllegalStateException(

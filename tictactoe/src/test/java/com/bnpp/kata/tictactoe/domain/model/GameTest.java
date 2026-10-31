@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class GameTest {
@@ -50,11 +51,11 @@ class GameTest {
     void shouldSetGameStatusToWonWhenPlayerWinsHorizontally() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(1, 0); // O
-        game.play(0, 1); // X
-        game.play(1, 1); // O
-        game.play(0, 2); // X wins
+        game.play(0, 0);
+        game.play(1, 0);
+        game.play(0, 1);
+        game.play(1, 1);
+        game.play(0, 2);
 
         assertEquals(GameStatus.WON, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
@@ -64,11 +65,11 @@ class GameTest {
     void shouldSetGameStatusToWonWhenPlayerWinsVertically() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(0, 1); // O
-        game.play(1, 0); // X
-        game.play(1, 1); // O
-        game.play(2, 0); // X wins
+        game.play(0, 0);
+        game.play(0, 1);
+        game.play(1, 0);
+        game.play(1, 1);
+        game.play(2, 0);
 
         assertEquals(GameStatus.WON, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
@@ -78,11 +79,11 @@ class GameTest {
     void shouldSetGameStatusToWonWhenPlayerWinsDiagonally() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(0, 1); // O
-        game.play(1, 1); // X
-        game.play(0, 2); // O
-        game.play(2, 2); // X wins
+        game.play(0, 0);
+        game.play(0, 1);
+        game.play(1, 1);
+        game.play(0, 2);
+        game.play(2, 2);
 
         assertEquals(GameStatus.WON, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
@@ -92,10 +93,10 @@ class GameTest {
     void shouldKeepGameInProgressWhenNoPlayerHasWon() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(0, 1); // O
-        game.play(0, 2); // X
-        game.play(1, 1); // O
+        game.play(0, 0);
+        game.play(0, 1);
+        game.play(0, 2);
+        game.play(1, 1);
 
         assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
@@ -105,15 +106,15 @@ class GameTest {
     void shouldSetGameStatusToDrawWhenBoardIsFullWithoutWinner() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(1, 1); // O
-        game.play(0, 2); // X
-        game.play(0, 1); // O
-        game.play(1, 0); // X
-        game.play(2, 0); // O
-        game.play(1, 2); // X
-        game.play(2, 2); // O
-        game.play(2, 1); // X
+        game.play(0, 0);
+        game.play(1, 1);
+        game.play(0, 2);
+        game.play(0, 1);
+        game.play(1, 0);
+        game.play(2, 0);
+        game.play(1, 2);
+        game.play(2, 2);
+        game.play(2, 1);
 
         assertEquals(GameStatus.DRAW, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
@@ -123,11 +124,11 @@ class GameTest {
     void shouldRejectMoveWhenGameIsAlreadyWon() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(1, 0); // O
-        game.play(0, 1); // X
-        game.play(1, 1); // O
-        game.play(0, 2); // X wins
+        game.play(0, 0);
+        game.play(1, 0);
+        game.play(0, 1);
+        game.play(1, 1);
+        game.play(0, 2);
 
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
@@ -148,15 +149,15 @@ class GameTest {
     void shouldRejectMoveWhenGameIsAlreadyDrawn() {
         Game game = new Game();
 
-        game.play(0, 0); // X
-        game.play(1, 1); // O
-        game.play(0, 2); // X
-        game.play(0, 1); // O
-        game.play(1, 0); // X
-        game.play(2, 0); // O
-        game.play(1, 2); // X
-        game.play(2, 2); // O
-        game.play(2, 1); // X draws
+        game.play(0, 0);
+        game.play(1, 1);
+        game.play(0, 2);
+        game.play(0, 1);
+        game.play(1, 0);
+        game.play(2, 0);
+        game.play(1, 2);
+        game.play(2, 2);
+        game.play(2, 1);
 
         IllegalStateException exception = assertThrows(
                 IllegalStateException.class,
@@ -171,6 +172,90 @@ class GameTest {
         assertEquals(Mark.X, game.getMarkAt(0, 0));
         assertEquals(Mark.X, game.getCurrentMark());
         assertEquals(GameStatus.DRAW, game.getStatus());
+    }
+
+    @Test
+    void shouldRestartGameAfterPlayerWins() {
+        Game game = new Game();
+
+        game.play(0, 0);
+        game.play(1, 0);
+        game.play(0, 1);
+        game.play(1, 1);
+        game.play(0, 2);
+
+        assertEquals(GameStatus.WON, game.getStatus());
+
+        game.restart();
+
+        assertGameIsInInitialState(game);
+    }
+
+    @Test
+    void shouldRestartGameAfterDraw() {
+        Game game = new Game();
+
+        game.play(0, 0);
+        game.play(1, 1);
+        game.play(0, 2);
+        game.play(0, 1);
+        game.play(1, 0);
+        game.play(2, 0);
+        game.play(1, 2);
+        game.play(2, 2);
+        game.play(2, 1);
+
+        assertEquals(GameStatus.DRAW, game.getStatus());
+
+        game.restart();
+
+        assertGameIsInInitialState(game);
+    }
+
+    @Test
+    void shouldRestartGameWhileGameIsInProgress() {
+        Game game = new Game();
+
+        game.play(0, 0);
+        game.play(1, 1);
+
+        assertEquals(Mark.X, game.getCurrentMark());
+
+        game.restart();
+
+        assertGameIsInInitialState(game);
+    }
+
+    @Test
+    void shouldAllowPlayingAgainAfterRestart() {
+        Game game = new Game();
+
+        game.play(0, 0);
+        game.play(1, 0);
+        game.play(0, 1);
+        game.play(1, 1);
+        game.play(0, 2);
+
+        game.restart();
+
+        game.play(2, 2);
+
+        assertEquals(Mark.X, game.getMarkAt(2, 2));
+        assertEquals(Mark.O, game.getCurrentMark());
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
+    }
+
+    @Test
+    void shouldRestartTheSameGameInstance() {
+        Game game = new Game();
+
+        game.play(0, 0);
+
+        Game originalGame = game;
+
+        game.restart();
+
+        assertSame(originalGame, game);
     }
 
     @Test
@@ -199,5 +284,16 @@ class GameTest {
 
         assertEquals(Mark.X, game.getCurrentMark());
         assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
+    }
+
+    private void assertGameIsInInitialState(Game game) {
+        assertEquals(Mark.X, game.getCurrentMark());
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
+
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                assertNull(game.getMarkAt(row, column));
+            }
+        }
     }
 }
