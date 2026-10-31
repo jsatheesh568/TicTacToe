@@ -1,3 +1,4 @@
+
 package com.bnpp.kata.tictactoe.domain.model;
 
 import java.util.ArrayList;
@@ -30,6 +31,62 @@ public class Board {
         return getCell(row, column).isEmpty();
     }
 
+    public boolean hasHorizontalWinner(Mark mark) {
+
+        validateMark(mark);
+
+        for (int row = 0; row < BOARD_SIZE; row++) {
+
+            boolean winningRow = true;
+
+            for (int column = 0; column < BOARD_SIZE; column++) {
+
+                if (getMarkAt(row, column) != mark) {
+                    winningRow = false;
+                    break;
+                }
+            }
+
+            if (winningRow) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean hasVerticalWinner(Mark mark) {
+
+        validateMark(mark);
+
+        for (int column = 0; column < BOARD_SIZE; column++) {
+
+            boolean winningColumn = true;
+
+            for (int row = 0; row < BOARD_SIZE; row++) {
+
+                if (getMarkAt(row, column) != mark) {
+                    winningColumn = false;
+                    break;
+                }
+            }
+
+            if (winningColumn) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void validateMark(Mark mark) {
+        if (mark == null) {
+            throw new IllegalArgumentException(
+                    "Player mark cannot be null"
+            );
+        }
+    }
+
     private Cell getCell(int row, int column) {
         validatePosition(row, column);
 
@@ -50,31 +107,5 @@ public class Board {
 
     private int calculateIndex(int row, int column) {
         return row * BOARD_SIZE + column;
-    }
-
-    public boolean hasHorizontalWinner(Mark mark) {
-
-        if (mark == null) {
-            throw new IllegalArgumentException("Player mark cannot be null");
-        }
-
-        for (int row = 0; row < BOARD_SIZE; row++) {
-
-            boolean winningRow = true;
-
-            for (int column = 0; column < BOARD_SIZE; column++) {
-
-                if (getMarkAt(row, column) != mark) {
-                    winningRow = false;
-                    break;
-                }
-            }
-
-            if (winningRow) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
