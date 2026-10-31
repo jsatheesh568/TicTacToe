@@ -51,4 +51,30 @@ public class Board {
     private int calculateIndex(int row, int column) {
         return row * BOARD_SIZE + column;
     }
+
+    public boolean hasHorizontalWinner(Mark mark) {
+
+        if (mark == null) {
+            throw new IllegalArgumentException("Player mark cannot be null");
+        }
+
+        for (int row = 0; row < BOARD_SIZE; row++) {
+
+            boolean winningRow = true;
+
+            for (int column = 0; column < BOARD_SIZE; column++) {
+
+                if (getMarkAt(row, column) != mark) {
+                    winningRow = false;
+                    break;
+                }
+            }
+
+            if (winningRow) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
