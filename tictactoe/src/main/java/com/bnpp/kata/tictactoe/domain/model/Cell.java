@@ -1,9 +1,31 @@
 package com.bnpp.kata.tictactoe.domain.model;
 
 public class Cell {
-    private boolean occupied;
+
+    private Mark mark;
 
     public boolean isEmpty() {
-        return !occupied;
+        return mark == null;
+    }
+
+    public Mark getMark() {
+        return mark;
+    }
+
+    public void placeMark(Mark mark) {
+
+        if (mark == null) {
+            throw new IllegalArgumentException(
+                    "Player mark cannot be null"
+            );
+        }
+
+        if (!isEmpty()) {
+            throw new IllegalStateException(
+                    "Cell is already occupied"
+            );
+        }
+
+        this.mark = mark;
     }
 }
