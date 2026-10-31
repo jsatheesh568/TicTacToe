@@ -8,18 +8,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class BoardTest {
 
     @Test
-    void shouldInitializeBoardWithNineCells() {
+    void shouldInitializeAllNineCellsAsEmpty() {
         Board board = new Board();
 
-        assertThat(board.getCells()).hasSize(9);
-    }
-
-    @Test
-    void shouldInitializeAllCellsAsEmpty() {
-        Board board = new Board();
-
-        assertThat(board.getCells())
-                .allMatch(Cell::isEmpty);
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                assertThat(board.isCellEmpty(row, column)).isTrue();
+            }
+        }
     }
 
     @Test
@@ -28,8 +24,7 @@ class BoardTest {
 
         board.placeMark(0, 0, Mark.X);
 
-        assertThat(board.getCell(0, 0).getMark())
-                .isEqualTo(Mark.X);
+        assertThat(board.getMarkAt(0, 0)).isEqualTo(Mark.X);
     }
 
     @Test
@@ -38,8 +33,7 @@ class BoardTest {
 
         board.placeMark(2, 2, Mark.O);
 
-        assertThat(board.getCell(2, 2).getMark())
-                .isEqualTo(Mark.O);
+        assertThat(board.getMarkAt(2, 2)).isEqualTo(Mark.O);
     }
 
     @Test
@@ -48,12 +42,11 @@ class BoardTest {
 
         board.placeMark(0, 0, Mark.X);
 
-        assertThat(board.getCell(0, 0).getMark())
-                .isEqualTo(Mark.X);
+        assertThat(board.getMarkAt(0, 0)).isEqualTo(Mark.X);
 
-        assertThat(board.getCell(0, 1).isEmpty()).isTrue();
-        assertThat(board.getCell(1, 1).isEmpty()).isTrue();
-        assertThat(board.getCell(2, 2).isEmpty()).isTrue();
+        assertThat(board.isCellEmpty(0, 1)).isTrue();
+        assertThat(board.isCellEmpty(1, 1)).isTrue();
+        assertThat(board.isCellEmpty(2, 2)).isTrue();
     }
 
     @Test

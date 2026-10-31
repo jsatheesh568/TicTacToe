@@ -1,7 +1,6 @@
 package com.bnpp.kata.tictactoe.domain.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class Board {
@@ -19,21 +18,24 @@ public class Board {
         }
     }
 
-    public List<Cell> getCells() {
-        return Collections.unmodifiableList(cells);
+    public void placeMark(int row, int column, Mark mark) {
+        getCell(row, column).placeMark(mark);
     }
 
-    public Cell getCell(int row, int column) {
+    public Mark getMarkAt(int row, int column) {
+        return getCell(row, column).getMark();
+    }
+
+    public boolean isCellEmpty(int row, int column) {
+        return getCell(row, column).isEmpty();
+    }
+
+    private Cell getCell(int row, int column) {
         validatePosition(row, column);
 
         int index = calculateIndex(row, column);
 
         return cells.get(index);
-    }
-
-    public void placeMark(int row, int column, Mark mark) {
-        Cell cell = getCell(row, column);
-        cell.placeMark(mark);
     }
 
     private void validatePosition(int row, int column) {

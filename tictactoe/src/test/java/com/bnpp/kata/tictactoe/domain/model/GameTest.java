@@ -20,9 +20,7 @@ class GameTest {
 
         game.play(0, 0);
 
-        assertThat(game.getBoard().getCell(0, 0).getMark())
-                .isEqualTo(Mark.X);
-
+        assertThat(game.getMarkAt(0, 0)).isEqualTo(Mark.X);
         assertThat(game.getCurrentMark()).isEqualTo(Mark.O);
     }
 
@@ -33,12 +31,8 @@ class GameTest {
         game.play(0, 0);
         game.play(1, 1);
 
-        assertThat(game.getBoard().getCell(0, 0).getMark())
-                .isEqualTo(Mark.X);
-
-        assertThat(game.getBoard().getCell(1, 1).getMark())
-                .isEqualTo(Mark.O);
-
+        assertThat(game.getMarkAt(0, 0)).isEqualTo(Mark.X);
+        assertThat(game.getMarkAt(1, 1)).isEqualTo(Mark.O);
         assertThat(game.getCurrentMark()).isEqualTo(Mark.X);
     }
 
@@ -63,4 +57,4 @@ class GameTest {
 
         assertThat(game.getCurrentMark()).isEqualTo(Mark.X);
     }
-}   
+}

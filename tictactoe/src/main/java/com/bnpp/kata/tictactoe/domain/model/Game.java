@@ -14,8 +14,8 @@ public class Game {
         return currentMark;
     }
 
-    public Board getBoard() {
-        return board;
+    public Mark getMarkAt(int row, int column) {
+        return board.getMarkAt(row, column);
     }
 
     public void play(int row, int column) {
