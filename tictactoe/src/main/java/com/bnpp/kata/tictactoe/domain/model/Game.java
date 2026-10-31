@@ -12,19 +12,49 @@ public class Game {
     private final List<Move> moveHistory;
     private final Deque<Move> redoHistory;
 
-    private Mark currentMark;
+    private final Player playerX;
+    private final Player playerO;
+
+    private Player currentPlayer;
     private GameStatus status;
 
     public Game() {
+        this(
+                new Player("Player X", Mark.X),
+                new Player("Player O", Mark.O)
+        );
+    }
+
+    public Game(Player playerX, Player playerO) {
+        validatePlayers(playerX, playerO);
+
         this.board = new Board();
         this.moveHistory = new ArrayList<>();
         this.redoHistory = new ArrayDeque<>();
-        this.currentMark = Mark.X;
+
+        this.playerX = playerX;
+        this.playerO = playerO;
+
+        this.currentPlayer = playerX;
         this.status = GameStatus.IN_PROGRESS;
     }
 
     public Mark getCurrentMark() {
-        return currentMark;
+        return currentPlayer.getMark();
+    }
+
+    public Player getCurrentPlayer() {
+        return currentPlayer;
+    }
+
+    public Player getPlayer(Mark mark) {
+        if (mark == null) {
+            throw new IllegalArgumentException(
+                    "Player mark cannot be null"
+            );
+        }
+
+        return mark == Mark.X ? playerX : playerO;
     }
 
     public GameStatus getStatus() {
@@ -42,9 +72,11 @@ public class Game {
     public void play(int row, int column) {
         validateGameIsInProgress();
 
-        board.placeMark(row, column, currentMark);
+        Mark mark = currentPlayer.getMark();
 
-        moveHistory.add(new Move(currentMark, row, column));
+        board.placeMark(row, column, mark);
+
+        moveHistory.add(new Move(mark, row, column));
 
         // A new move creates a different game history.
         redoHistory.clear();
@@ -67,7 +99,7 @@ public class Game {
 
         redoHistory.push(lastMove);
 
-        currentMark = lastMove.getMark();
+        currentPlayer = getPlayer(lastMove.getMark());
         status = GameStatus.IN_PROGRESS;
     }
 
@@ -88,7 +120,7 @@ public class Game {
 
         moveHistory.add(move);
 
-        currentMark = move.getMark();
+        currentPlayer = getPlayer(move.getMark());
 
         updateGameStatus();
     }
@@ -98,12 +130,14 @@ public class Game {
         moveHistory.clear();
         redoHistory.clear();
 
-        currentMark = Mark.X;
+        currentPlayer = playerX;
         status = GameStatus.IN_PROGRESS;
     }
 
     private void updateGameStatus() {
-        if (board.hasWinner(currentMark)) {
+        Mark mark = currentPlayer.getMark();
+
+        if (board.hasWinner(mark)) {
             status = GameStatus.WON;
             return;
         }
@@ -126,8 +160,23 @@ public class Game {
     }
 
     private void switchTurn() {
-        currentMark = currentMark == Mark.X
-                ? Mark.O
-                : Mark.X;
+        currentPlayer = currentPlayer == playerX
+                ? playerO
+                : playerX;
+    }
+
+    private void validatePlayers(Player playerX, Player playerO) {
+        if (playerX == null || playerO == null) {
+            throw new IllegalArgumentException(
+                    "Both players must be provided"
+            );
+        }
+
+        if (playerX.getMark() != Mark.X
+                || playerO.getMark() != Mark.O) {
+            throw new IllegalArgumentException(
+                    "Player X must have mark X and Player O must have mark O"
+            );
+        }
     }
 }
