@@ -1,7 +1,7 @@
-
 package com.bnpp.kata.tictactoe.domain.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Board {
@@ -49,6 +49,20 @@ public class Board {
         for (int index = 0; index < TOTAL_CELLS; index++) {
             cells.set(index, new Cell());
         }
+    }
+
+    public List<Position> getAvailablePositions() {
+        List<Position> positions = new ArrayList<>();
+
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int column = 0; column < BOARD_SIZE; column++) {
+                if (isCellEmpty(row, column)) {
+                    positions.add(new Position(row, column));
+                }
+            }
+        }
+
+        return Collections.unmodifiableList(positions);
     }
 
     public boolean hasHorizontalWinner(Mark mark) {
@@ -122,7 +136,9 @@ public class Board {
 
     private Cell getCell(int row, int column) {
         validatePosition(row, column);
+
         int index = calculateIndex(row, column);
+
         return cells.get(index);
     }
 

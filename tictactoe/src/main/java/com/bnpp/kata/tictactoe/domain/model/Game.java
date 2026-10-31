@@ -1,5 +1,7 @@
 package com.bnpp.kata.tictactoe.domain.model;
 
+import com.bnpp.kata.tictactoe.domain.service.ComputerPlayer;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +16,7 @@ public class Game {
 
     private final Player playerX;
     private final Player playerO;
+    private final ComputerPlayer computerPlayer;
 
     private Player currentPlayer;
     private GameStatus status;
@@ -26,7 +29,21 @@ public class Game {
     }
 
     public Game(Player playerX, Player playerO) {
+        this(playerX, playerO, new ComputerPlayer());
+    }
+
+    public Game(
+            Player playerX,
+            Player playerO,
+            ComputerPlayer computerPlayer
+    ) {
         validatePlayers(playerX, playerO);
+
+        if (computerPlayer == null) {
+            throw new IllegalArgumentException(
+                    "Computer player service cannot be null"
+            );
+        }
 
         this.board = new Board();
         this.moveHistory = new ArrayList<>();
@@ -34,6 +51,7 @@ public class Game {
 
         this.playerX = playerX;
         this.playerO = playerO;
+        this.computerPlayer = computerPlayer;
 
         this.currentPlayer = playerX;
         this.status = GameStatus.IN_PROGRESS;
@@ -78,10 +96,26 @@ public class Game {
 
         moveHistory.add(new Move(mark, row, column));
 
-        // A new move creates a different game history.
         redoHistory.clear();
 
         updateGameStatus();
+    }
+
+    public void playComputerMove() {
+        validateGameIsInProgress();
+
+        if (!currentPlayer.isComputer()) {
+            throw new IllegalStateException(
+                    "It is not the computer player's turn"
+            );
+        }
+
+        Position position = computerPlayer.choosePosition(
+                currentPlayer,
+                board.getAvailablePositions()
+        );
+
+        play(position.getRow(), position.getColumn());
     }
 
     public void undoLastMove() {
