@@ -1,6 +1,5 @@
 package com.bnpp.kata.tictactoe.application.service;
 
-
 import com.bnpp.kata.tictactoe.domain.model.Game;
 import com.bnpp.kata.tictactoe.domain.model.GameStatus;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
@@ -10,101 +9,132 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GameApplicationServiceTest {
+class GameMoveApplicationServiceTest {
 
-    private GameApplicationService gameApplicationService;
+    private GameApplicationService service;
 
     @BeforeEach
     void setUp() {
-        gameApplicationService = new GameApplicationService();
+        service = new GameApplicationService();
     }
 
     @Test
-    void shouldCreateAndStoreNewGame() {
-
-        String gameId = gameApplicationService.startGame(
+    void shouldPlayHumanMoveAndSwitchToNextHumanPlayer() {
+        GameSession session = service.startGame(
                 "Alice",
                 PlayerType.HUMAN,
                 "Bob",
                 PlayerType.HUMAN
         );
 
-        assertNotNull(gameId);
+        Game game = service.playMove(
+                session.getGameId(),
+                0,
+                0
+        );
 
-        Game game = gameApplicationService.getGame(gameId);
-
+        assertEquals(Mark.X, game.getMarkAt(0, 0));
+        assertNull(game.getMarkAt(0, 1));
+        assertEquals("Bob", game.getCurrentPlayer().getName());
+        assertEquals(Mark.O, game.getCurrentMark());
         assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
-        assertEquals(Mark.X, game.getCurrentMark());
-        assertEquals("Alice", game.getCurrentPlayer().getName());
     }
 
     @Test
-    void shouldCreateGameWithComputerPlayer() {
-
-        String gameId = gameApplicationService.startGame(
+    void shouldAutomaticallyPlayComputerMoveAfterHumanMove() {
+        GameSession session = service.startGame(
                 "Alice",
                 PlayerType.HUMAN,
                 "Computer",
                 PlayerType.COMPUTER
         );
 
-        Game game = gameApplicationService.getGame(gameId);
-
-        assertEquals(
-                PlayerType.COMPUTER,
-                game.getPlayer(Mark.O).getType()
+        Game game = service.playMove(
+                session.getGameId(),
+                0,
+                0
         );
+
+        assertEquals(Mark.X, game.getMarkAt(0, 0));
+
+        // The computer must have occupied one other cell.
+        int occupiedCells = 0;
+
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                if (game.getMarkAt(row, column) != null) {
+                    occupiedCells++;
+                }
+            }
+        }
+
+        assertEquals(2, occupiedCells);
+        assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
+        assertEquals("Alice", game.getCurrentPlayer().getName());
+        assertEquals(Mark.X, game.getCurrentMark());
     }
 
     @Test
-    void shouldDefaultMissingPlayerTypesToHuman() {
-
-        String gameId = gameApplicationService.startGame(
+    void shouldNotPlayComputerMoveWhenHumanWins() {
+        GameSession session = service.startGame(
                 "Alice",
-                null,
-                "Bob",
-                null
-        );
-
-        Game game = gameApplicationService.getGame(gameId);
-
-        assertEquals(
                 PlayerType.HUMAN,
-                game.getPlayer(Mark.X).getType()
+                "Computer",
+                PlayerType.COMPUTER
         );
 
-        assertEquals(
-                PlayerType.HUMAN,
-                game.getPlayer(Mark.O).getType()
+        Game game = session.getGame();
+
+        // Arrange a position where X can win on the next move.
+        game.play(0, 0); // X
+        game.play(1, 0); // O
+        game.play(0, 1); // X
+        game.play(1, 1); // O
+
+        // It is now X's turn. This move wins the game.
+        Game result = service.playMove(
+                session.getGameId(),
+                0,
+                2
         );
+
+        assertEquals(Mark.X, result.getMarkAt(0, 2));
+        assertEquals(GameStatus.WON, result.getStatus());
+
+        // The computer must not make another move after the game ends.
+        int occupiedCells = 0;
+
+        for (int row = 0; row < 3; row++) {
+            for (int column = 0; column < 3; column++) {
+                if (result.getMarkAt(row, column) != null) {
+                    occupiedCells++;
+                }
+            }
+        }
+
+        assertEquals(5, occupiedCells);
     }
 
     @Test
-    void shouldThrowExceptionWhenGameDoesNotExist() {
-
+    void shouldRejectMoveWhenGameDoesNotExist() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> gameApplicationService.getGame("unknown-game-id")
+                () -> service.playMove("invalid-game-id", 0, 0)
         );
     }
 
     @Test
-    void shouldCreateUniqueGameIds() {
-
-        String firstGameId = gameApplicationService.startGame(
+    void shouldRejectMoveWhenItIsComputerPlayersTurn() {
+        GameSession session = service.startGame(
+                "Computer",
+                PlayerType.COMPUTER,
                 "Alice",
-                PlayerType.HUMAN,
-                "Bob",
                 PlayerType.HUMAN
         );
 
-        String secondGameId = gameApplicationService.startGame(
-                "Charlie",
-                PlayerType.HUMAN,
-                "David",
-                PlayerType.HUMAN
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.playMove(session.getGameId(), 0, 0)
         );
-
-        assertNotEquals(firstGameId, secondGameId);
     }
 }

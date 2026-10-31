@@ -1,6 +1,7 @@
 package com.bnpp.kata.tictactoe.application.service;
 
 import com.bnpp.kata.tictactoe.domain.model.Game;
+import com.bnpp.kata.tictactoe.domain.model.GameStatus;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
 import com.bnpp.kata.tictactoe.domain.model.Player;
 import com.bnpp.kata.tictactoe.domain.model.PlayerType;
@@ -16,7 +17,7 @@ public class GameApplicationService {
     private final ConcurrentMap<String, Game> games =
             new ConcurrentHashMap<>();
 
-    public String startGame(
+    public GameSession startGame(
             String playerXName,
             PlayerType playerXType,
             String playerOName,
@@ -40,7 +41,7 @@ public class GameApplicationService {
 
         games.put(gameId, game);
 
-        return gameId;
+        return new GameSession(gameId, game);
     }
 
     public Game getGame(String gameId) {
@@ -50,6 +51,25 @@ public class GameApplicationService {
             throw new IllegalArgumentException(
                     "Game not found: " + gameId
             );
+        }
+
+        return game;
+    }
+
+    public Game playMove(String gameId, int row, int column) {
+        Game game = getGame(gameId);
+
+        if (game.getCurrentPlayer().isComputer()) {
+            throw new IllegalStateException(
+                    "It is the computer player's turn"
+            );
+        }
+
+        game.play(row, column);
+
+        if (game.getStatus() == GameStatus.IN_PROGRESS
+                && game.getCurrentPlayer().isComputer()) {
+            game.playComputerMove();
         }
 
         return game;
