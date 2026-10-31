@@ -79,6 +79,27 @@ public class Board {
         return false;
     }
 
+    public boolean hasDiagonalWinner(Mark mark) {
+
+        validateMark(mark);
+
+        boolean topLeftToBottomRight = true;
+        boolean topRightToBottomLeft = true;
+
+        for (int index = 0; index < BOARD_SIZE; index++) {
+
+            if (getMarkAt(index, index) != mark) {
+                topLeftToBottomRight = false;
+            }
+
+            if (getMarkAt(index, BOARD_SIZE - 1 - index) != mark) {
+                topRightToBottomLeft = false;
+            }
+        }
+
+        return topLeftToBottomRight || topRightToBottomLeft;
+    }
+
     private void validateMark(Mark mark) {
         if (mark == null) {
             throw new IllegalArgumentException(

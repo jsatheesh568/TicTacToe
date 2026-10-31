@@ -1,4 +1,3 @@
-
 package com.bnpp.kata.tictactoe.domain.model;
 
 import org.junit.jupiter.api.Test;
@@ -217,6 +216,56 @@ class BoardTest {
         Board board = new Board();
 
         assertThatThrownBy(() -> board.hasVerticalWinner(null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    // Diagonal winning tests
+
+    @Test
+    void shouldDetectDiagonalWinFromTopLeftToBottomRight() {
+        Board board = new Board();
+
+        board.placeMark(0, 0, Mark.X);
+        board.placeMark(1, 1, Mark.X);
+        board.placeMark(2, 2, Mark.X);
+
+        assertThat(board.hasDiagonalWinner(Mark.X)).isTrue();
+    }
+
+    @Test
+    void shouldDetectDiagonalWinFromTopRightToBottomLeft() {
+        Board board = new Board();
+
+        board.placeMark(0, 2, Mark.O);
+        board.placeMark(1, 1, Mark.O);
+        board.placeMark(2, 0, Mark.O);
+
+        assertThat(board.hasDiagonalWinner(Mark.O)).isTrue();
+    }
+
+    @Test
+    void shouldReturnFalseWhenNoDiagonalWinningCombinationExists() {
+        Board board = new Board();
+
+        board.placeMark(0, 0, Mark.X);
+        board.placeMark(1, 1, Mark.X);
+        board.placeMark(2, 2, Mark.O);
+
+        assertThat(board.hasDiagonalWinner(Mark.X)).isFalse();
+    }
+
+    @Test
+    void shouldReturnFalseWhenBoardIsEmptyForDiagonalCheck() {
+        Board board = new Board();
+
+        assertThat(board.hasDiagonalWinner(Mark.X)).isFalse();
+    }
+
+    @Test
+    void shouldRejectNullMarkWhenCheckingDiagonalWinner() {
+        Board board = new Board();
+
+        assertThatThrownBy(() -> board.hasDiagonalWinner(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }
