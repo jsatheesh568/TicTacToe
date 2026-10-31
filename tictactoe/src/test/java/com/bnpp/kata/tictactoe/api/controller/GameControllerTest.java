@@ -320,10 +320,16 @@ class GameControllerTest {
     // --------------------------------------------------
 
     @Test
-    void shouldReturnBadRequestWhenGameDoesNotExist() throws Exception {
+    void shouldReturnNotFoundWhenGameDoesNotExist() throws Exception {
 
         mockMvc.perform(get(GAMES_API + "/unknown-game-id"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.error").value("GAME_NOT_FOUND"))
+                .andExpect(jsonPath("$.message")
+                        .value("Game not found: unknown-game-id"))
+                .andExpect(jsonPath("$.path")
+                        .value("/api/games/unknown-game-id"));
     }
 
     // --------------------------------------------------
@@ -383,5 +389,110 @@ class GameControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturnConflictWhenCellIsAlreadyOccupied() throws Exception {
+
+        String gameId = startGame(
+                "Alice", "HUMAN", "Bob", "HUMAN"
+        );
+
+        makeMove(gameId, 0, 0);
+
+        String request = """
+            {
+                "row": 0,
+                "column": 0
+            }
+            """;
+
+        mockMvc.perform(post(GAMES_API + "/{gameId}/moves", gameId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(409))
+                .andExpect(jsonPath("$.error")
+                        .value("INVALID_GAME_OPERATION"))
+                .andExpect(jsonPath("$.message")
+                        .value("Cell is already occupied"))
+                .andExpect(jsonPath("$.path")
+                        .value("/api/games/" + gameId + "/moves"));
+    }
+
+    @Test
+    void shouldReturnConflictWhenMoveIsAttemptedAfterGameIsWon()
+            throws Exception {
+
+        String gameId = startGame(
+                "Alice", "HUMAN", "Bob", "HUMAN"
+        );
+
+        makeMove(gameId, 0, 0); // X
+        makeMove(gameId, 1, 0); // O
+        makeMove(gameId, 0, 1); // X
+        makeMove(gameId, 1, 1); // O
+        makeMove(gameId, 0, 2); // X wins
+
+        String request = """
+            {
+                "row": 2,
+                "column": 2
+            }
+            """;
+
+        mockMvc.perform(post(GAMES_API + "/{gameId}/moves", gameId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error")
+                        .value("INVALID_GAME_OPERATION"));
+    }
+
+    @Test
+    void shouldReturnBadRequestWithValidationDetailsWhenNameIsBlank()
+            throws Exception {
+
+        String request = """
+            {
+                "playerXName": "",
+                "playerXType": "HUMAN",
+                "playerOName": "Bob",
+                "playerOType": "HUMAN"
+            }
+            """;
+
+        mockMvc.perform(post(GAMES_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.message")
+                        .value(org.hamcrest.Matchers.containsString(
+                                "playerXName"
+                        )))
+                .andExpect(jsonPath("$.path").value(GAMES_API));
+    }
+
+    @Test
+    void shouldReturnBadRequestForInvalidPlayerType() throws Exception {
+
+        String request = """
+            {
+                "playerXName": "Alice",
+                "playerXType": "INVALID_TYPE",
+                "playerOName": "Bob",
+                "playerOType": "HUMAN"
+            }
+            """;
+
+        mockMvc.perform(post(GAMES_API)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.error").value("INVALID_REQUEST"))
+                .andExpect(jsonPath("$.path").value(GAMES_API));
     }
 }

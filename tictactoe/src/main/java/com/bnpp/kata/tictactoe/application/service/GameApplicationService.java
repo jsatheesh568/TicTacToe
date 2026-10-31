@@ -1,10 +1,13 @@
 package com.bnpp.kata.tictactoe.application.service;
 
+import com.bnpp.kata.tictactoe.application.exception.GameNotFoundException;
+import com.bnpp.kata.tictactoe.application.exception.InvalidGameOperationException;
 import com.bnpp.kata.tictactoe.domain.model.Game;
 import com.bnpp.kata.tictactoe.domain.model.GameStatus;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
 import com.bnpp.kata.tictactoe.domain.model.Player;
 import com.bnpp.kata.tictactoe.domain.model.PlayerType;
+
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -48,7 +51,7 @@ public class GameApplicationService {
         Game game = games.get(gameId);
 
         if (game == null) {
-            throw new IllegalArgumentException(
+            throw new GameNotFoundException(
                     "Game not found: " + gameId
             );
         }
@@ -56,23 +59,36 @@ public class GameApplicationService {
         return game;
     }
 
-    public Game playMove(String gameId, int row, int column) {
+    public Game playMove(
+            String gameId,
+            int row,
+            int column
+    ) {
         Game game = getGame(gameId);
 
-        if (game.getCurrentPlayer().isComputer()) {
-            throw new IllegalStateException(
-                    "It is the computer player's turn"
+        try {
+            if (game.getCurrentPlayer().isComputer()) {
+                throw new InvalidGameOperationException(
+                        "It is the computer player's turn"
+                );
+            }
+
+            game.play(row, column);
+
+            if (game.getStatus() == GameStatus.IN_PROGRESS
+                    && game.getCurrentPlayer().isComputer()) {
+                game.playComputerMove();
+            }
+
+            return game;
+
+        } catch (InvalidGameOperationException exception) {
+            throw exception;
+        } catch (IllegalStateException exception) {
+            throw new InvalidGameOperationException(
+                    exception.getMessage()
             );
         }
-
-        game.play(row, column);
-
-        if (game.getStatus() == GameStatus.IN_PROGRESS
-                && game.getCurrentPlayer().isComputer()) {
-            game.playComputerMove();
-        }
-
-        return game;
     }
 
     private PlayerType resolvePlayerType(PlayerType playerType) {
