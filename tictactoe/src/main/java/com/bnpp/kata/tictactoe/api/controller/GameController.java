@@ -1,25 +1,15 @@
+
 package com.bnpp.kata.tictactoe.api.controller;
 
-import com.bnpp.kata.tictactoe.api.dto.GameMoveResponse;
-import com.bnpp.kata.tictactoe.api.dto.GameStartResponse;
-import com.bnpp.kata.tictactoe.api.dto.GameStateResponse;
-import com.bnpp.kata.tictactoe.api.dto.MakeMoveRequest;
-import com.bnpp.kata.tictactoe.api.dto.MoveHistoryResponse;
-import com.bnpp.kata.tictactoe.api.dto.StartGameRequest;
+import com.bnpp.kata.tictactoe.api.dto.*;
 import com.bnpp.kata.tictactoe.application.service.GameApplicationService;
-import com.bnpp.kata.tictactoe.application.service.GameSession;
 import com.bnpp.kata.tictactoe.domain.model.Game;
 import com.bnpp.kata.tictactoe.domain.model.Mark;
 import com.bnpp.kata.tictactoe.domain.model.Move;
-import com.bnpp.kata.tictactoe.domain.model.Player;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,54 +18,45 @@ import java.util.List;
 @RequestMapping("/api/games")
 public class GameController {
 
-    private static final int BOARD_SIZE = 3;
-
     private final GameApplicationService gameApplicationService;
 
-    public GameController(
-            GameApplicationService gameApplicationService
-    ) {
+    public GameController(GameApplicationService gameApplicationService) {
         this.gameApplicationService = gameApplicationService;
     }
 
     @PostMapping
     public ResponseEntity<GameStartResponse> startGame(
-            @RequestBody StartGameRequest request
+            @Valid @RequestBody StartGameRequest request
     ) {
-        GameSession session = gameApplicationService.startGame(
+        var gameSession = gameApplicationService.startGame(
                 request.getPlayerXName(),
                 request.getPlayerXType(),
                 request.getPlayerOName(),
                 request.getPlayerOType()
         );
 
-        Game game = session.getGame();
-
-        Player playerX = game.getPlayer(Mark.X);
-        Player playerO = game.getPlayer(Mark.O);
+        Game game = gameSession.getGame();
 
         GameStartResponse response = new GameStartResponse(
-                session.getGameId(),
-                playerX.getName(),
-                playerX.getMark(),
-                playerX.getType(),
-                playerO.getName(),
-                playerO.getMark(),
-                playerO.getType(),
+                gameSession.getGameId(),
+                game.getPlayer(Mark.X).getName(),
+                game.getPlayer(Mark.X).getMark(),
+                game.getPlayer(Mark.X).getType(),
+                game.getPlayer(Mark.O).getName(),
+                game.getPlayer(Mark.O).getMark(),
+                game.getPlayer(Mark.O).getType(),
                 game.getCurrentPlayer().getName(),
                 game.getCurrentMark(),
                 game.getStatus()
         );
 
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PostMapping("/{gameId}/moves")
     public ResponseEntity<GameMoveResponse> makeMove(
             @PathVariable String gameId,
-            @RequestBody MakeMoveRequest request
+            @Valid @RequestBody MakeMoveRequest request
     ) {
         Game game = gameApplicationService.playMove(
                 gameId,
@@ -100,17 +81,14 @@ public class GameController {
     ) {
         Game game = gameApplicationService.getGame(gameId);
 
-        Player playerX = game.getPlayer(Mark.X);
-        Player playerO = game.getPlayer(Mark.O);
-
         GameStateResponse response = new GameStateResponse(
                 gameId,
-                playerX.getName(),
-                playerX.getMark(),
-                playerX.getType(),
-                playerO.getName(),
-                playerO.getMark(),
-                playerO.getType(),
+                game.getPlayer(Mark.X).getName(),
+                game.getPlayer(Mark.X).getMark(),
+                game.getPlayer(Mark.X).getType(),
+                game.getPlayer(Mark.O).getName(),
+                game.getPlayer(Mark.O).getMark(),
+                game.getPlayer(Mark.O).getType(),
                 buildBoard(game),
                 game.getCurrentPlayer().getName(),
                 game.getCurrentMark(),
@@ -124,15 +102,12 @@ public class GameController {
     private List<List<String>> buildBoard(Game game) {
         List<List<String>> board = new ArrayList<>();
 
-        for (int row = 0; row < BOARD_SIZE; row++) {
+        for (int row = 0; row < 3; row++) {
             List<String> boardRow = new ArrayList<>();
 
-            for (int column = 0; column < BOARD_SIZE; column++) {
+            for (int column = 0; column < 3; column++) {
                 Mark mark = game.getMarkAt(row, column);
-
-                boardRow.add(
-                        mark == null ? null : mark.name()
-                );
+                boardRow.add(mark == null ? null : mark.name());
             }
 
             board.add(boardRow);
@@ -142,10 +117,10 @@ public class GameController {
     }
 
     private List<MoveHistoryResponse> buildMoveHistory(Game game) {
-        List<MoveHistoryResponse> history = new ArrayList<>();
+        List<MoveHistoryResponse> moveHistory = new ArrayList<>();
 
         for (Move move : game.getMoveHistory()) {
-            history.add(
+            moveHistory.add(
                     new MoveHistoryResponse(
                             move.getMark(),
                             move.getRow(),
@@ -154,6 +129,6 @@ public class GameController {
             );
         }
 
-        return history;
+        return moveHistory;
     }
 }
