@@ -1,3 +1,4 @@
+
 package com.bnpp.kata.tictactoe.domain.model;
 
 public class Game {
@@ -29,6 +30,11 @@ public class Game {
 
         if (board.hasWinner(currentMark)) {
             status = GameStatus.WON;
+            return;
+        }
+
+        if (board.isFull()) {
+            status = GameStatus.DRAW;
             return;
         }
 

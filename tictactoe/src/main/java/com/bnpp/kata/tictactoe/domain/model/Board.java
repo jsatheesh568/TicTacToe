@@ -31,6 +31,16 @@ public class Board {
         return getCell(row, column).isEmpty();
     }
 
+    public boolean isFull() {
+        for (Cell cell : cells) {
+            if (cell.isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public boolean hasHorizontalWinner(Mark mark) {
         validateMark(mark);
 

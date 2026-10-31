@@ -1,3 +1,4 @@
+
 package com.bnpp.kata.tictactoe.domain.model;
 
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,24 @@ class GameTest {
         game.play(1, 1); // O
 
         assertEquals(GameStatus.IN_PROGRESS, game.getStatus());
+        assertEquals(Mark.X, game.getCurrentMark());
+    }
+
+    @Test
+    void shouldSetGameStatusToDrawWhenBoardIsFullWithoutWinner() {
+        Game game = new Game();
+
+        game.play(0, 0); // X
+        game.play(1, 1); // O
+        game.play(0, 2); // X
+        game.play(0, 1); // O
+        game.play(1, 0); // X
+        game.play(2, 0); // O
+        game.play(1, 2); // X
+        game.play(2, 2); // O
+        game.play(2, 1); // X
+
+        assertEquals(GameStatus.DRAW, game.getStatus());
         assertEquals(Mark.X, game.getCurrentMark());
     }
 
