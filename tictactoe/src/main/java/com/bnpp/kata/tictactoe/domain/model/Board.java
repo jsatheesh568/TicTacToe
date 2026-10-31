@@ -32,15 +32,12 @@ public class Board {
     }
 
     public boolean hasHorizontalWinner(Mark mark) {
-
         validateMark(mark);
 
         for (int row = 0; row < BOARD_SIZE; row++) {
-
             boolean winningRow = true;
 
             for (int column = 0; column < BOARD_SIZE; column++) {
-
                 if (getMarkAt(row, column) != mark) {
                     winningRow = false;
                     break;
@@ -56,15 +53,12 @@ public class Board {
     }
 
     public boolean hasVerticalWinner(Mark mark) {
-
         validateMark(mark);
 
         for (int column = 0; column < BOARD_SIZE; column++) {
-
             boolean winningColumn = true;
 
             for (int row = 0; row < BOARD_SIZE; row++) {
-
                 if (getMarkAt(row, column) != mark) {
                     winningColumn = false;
                     break;
@@ -80,14 +74,12 @@ public class Board {
     }
 
     public boolean hasDiagonalWinner(Mark mark) {
-
         validateMark(mark);
 
         boolean topLeftToBottomRight = true;
         boolean topRightToBottomLeft = true;
 
         for (int index = 0; index < BOARD_SIZE; index++) {
-
             if (getMarkAt(index, index) != mark) {
                 topLeftToBottomRight = false;
             }
@@ -100,19 +92,17 @@ public class Board {
         return topLeftToBottomRight || topRightToBottomLeft;
     }
 
-    private void validateMark(Mark mark) {
-        if (mark == null) {
-            throw new IllegalArgumentException(
-                    "Player mark cannot be null"
-            );
-        }
+    public boolean hasWinner(Mark mark) {
+        validateMark(mark);
+
+        return hasHorizontalWinner(mark)
+                || hasVerticalWinner(mark)
+                || hasDiagonalWinner(mark);
     }
 
     private Cell getCell(int row, int column) {
         validatePosition(row, column);
-
         int index = calculateIndex(row, column);
-
         return cells.get(index);
     }
 
@@ -122,6 +112,14 @@ public class Board {
             throw new IndexOutOfBoundsException(
                     "Invalid board position: row=" + row
                             + ", column=" + column
+            );
+        }
+    }
+
+    private void validateMark(Mark mark) {
+        if (mark == null) {
+            throw new IllegalArgumentException(
+                    "Player mark cannot be null"
             );
         }
     }
